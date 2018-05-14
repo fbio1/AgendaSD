@@ -33,10 +33,10 @@ public class Contatos {
     public Contatos() {
     }
 
-    public Contatos(String nome, String numero) {
-        this.nome = nome;
-        this.numero = numero;
-    }
+//    public Contatos(String nome, String numero) {
+//        this.nome = nome;
+//        this.numero = numero;
+//    }
 
     public Contatos(String nome, String numero, Usuario usuario) {
         this.nome = nome;
@@ -68,6 +68,15 @@ public class Contatos {
         this.numero = numero;
     }
 
+    public Usuario getUsuario() {
+        return usuario;
+    }
+
+    public void setUsuario(Usuario usuario) {
+        this.usuario = usuario;
+    }
+
+    
     @Override
     public int hashCode() {
         int hash = 3;
