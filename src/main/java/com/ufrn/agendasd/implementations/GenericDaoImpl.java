@@ -24,7 +24,6 @@ public class GenericDaoImpl<T, ID extends Serializable> implements IGenericDao<T
     }
 
     public GenericDaoImpl(Class<T> klass) {
-
         this.klass = klass;
         this.session = HibernateUtil.getSessionFactory().openSession();
     }
@@ -40,6 +39,7 @@ public class GenericDaoImpl<T, ID extends Serializable> implements IGenericDao<T
         Transaction t = session.beginTransaction();
         session.saveOrUpdate((T) object);
         t.commit();
+        session.close();
     }
 
     @Override
@@ -47,6 +47,7 @@ public class GenericDaoImpl<T, ID extends Serializable> implements IGenericDao<T
         Transaction t = session.beginTransaction();
         session.delete((T) object);
         t.commit();
+        session.close();
     }
 
     @Override
@@ -102,8 +103,4 @@ public class GenericDaoImpl<T, ID extends Serializable> implements IGenericDao<T
         return (List<T>) criteria.list();
     }
 
-    @Override
-    public void close() {
-        session.close();
-    }
 }

@@ -1,71 +1,135 @@
 package com.ufrn.agendasd.services;
 
+import com.ufrn.agendasd.exceptions.CustomNoContentException;
 import com.ufrn.agendasd.exceptions.OutputMessage;
 import com.ufrn.agendasd.implementations.ContatosDaoImpl;
-import com.ufrn.agendasd.implementations.CredenciaisDaoImpl;
 import com.ufrn.agendasd.implementations.UsuarioDaoImpl;
 import com.ufrn.agendasd.interfaces.IContatosDao;
-import com.ufrn.agendasd.interfaces.ICredenciasDao;
 import com.ufrn.agendasd.interfaces.IUsuarioDao;
 import com.ufrn.agendasd.model.Contatos;
-import com.ufrn.agendasd.model.Credenciais;
 import com.ufrn.agendasd.model.Usuario;
 import com.ufrn.agendasd.security.Secured;
-import java.util.List;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
-import org.hibernate.criterion.Order;
 
 @Path("/contato")
 public class ServicoContato {
 
-    @Secured
     @POST
-    @Produces(MediaType.APPLICATION_JSON)
+    @Secured
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response create(Contatos c, @Context SecurityContext securityContext) {
-        try {
-            Usuario usuarioLogado = getUsuarioLogado(securityContext);
-            
-            if (usuarioLogado != null) {
-                c.setUsuario(usuarioLogado);
-                IContatosDao contatoDAO = new ContatosDaoImpl();
-                contatoDAO.save(c);
-            } else {
-                return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity(new OutputMessage(404, "Usuario náo autenticado!")).build();
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response create(Contatos contato, @Context SecurityContext securityContext) {
 
+        IContatosDao contatosDao = new ContatosDaoImpl();
+        IUsuarioDao usuariodao = new UsuarioDaoImpl();
+        try {
+            String idUser = securityContext.getUserPrincipal().getName();
+            System.out.println("id usuario: " + idUser);
+            Usuario usuario = usuariodao.findById(Integer.parseInt(idUser));
+
+            if (usuario != null) {
+                contato.setUsuario(usuario);
+                contatosDao.save(contato);
+            } else {
+                return Response.status(Response.Status.NOT_MODIFIED)
+                        .entity(contato)
+                        .build();
             }
 
         } catch (Exception e) {
-            return Response
-                    .status(Response.Status.INTERNAL_SERVER_ERROR)
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(e)
+                    .build();
+        } 
+
+        return Response.status(Response.Status.CREATED)
+                .entity(new OutputMessage(200, "OK! Contato salvo com sucesso!"))
+                .build();
+
+    }
+
+    @DELETE
+    @Secured
+    @Path("/{id}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response delete(@PathParam("id") int id, @Context SecurityContext securityContext) throws CustomNoContentException {
+        IContatosDao contactDao = new ContatosDaoImpl();
+        Contatos contato = contactDao.findById(id);
+        String idUser = securityContext.getUserPrincipal().getName();
+
+        if (contato == null) {
+            throw new CustomNoContentException();
+        }
+
+        if (contato.getUsuario()!= null) {
+            if (contato.getUsuario().getId() == Integer.parseInt((idUser))) {
+                contactDao.delete(contato);
+            } else {
+                throw new CustomNoContentException();
+            }
+        }
+
+        return Response.status(Response.Status.OK)
+                .entity(new OutputMessage(200, "Contato " + contato.getNome() + " foi removido com sucesso!"))
+                .build();
+    }
+
+    @PUT
+    @Secured
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response update(Contatos contato, @Context SecurityContext securityContext) {
+        String idUser = securityContext.getUserPrincipal().getName();
+        
+        System.out.println("Id do usuario" + idUser);
+        System.out.println("Id do contato" + contato.getUsuario().getId());
+        try {
+            if (contato.getUsuario().getId() == Integer.parseInt((idUser))) {
+                IContatosDao contactDao = new ContatosDaoImpl();
+                contactDao.save(contato);
+            }
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     .entity(new OutputMessage(500, e.getMessage()))
                     .build();
-
         }
-        return Response.status(Response.Status.CREATED).entity(c).build();
+        return Response.status(Response.Status.OK).entity(contato).build();
     }
 
+    @GET
     @Secured
-    public Usuario getUsuarioLogado(SecurityContext securityContext) {
+    @Path("/{id}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response listById(@PathParam("id") int idContato, @Context SecurityContext securityContext) {
+        try {
+            IContatosDao ContactDAO = new ContatosDaoImpl();
+            int idUser = Integer.parseInt(securityContext.getUserPrincipal().getName());
+            Contatos contato = ContactDAO.findById(idContato);
 
-        String token = securityContext.getUserPrincipal().getName();
-        System.out.println("token " + token);
-        ICredenciasDao credencialDAO = new CredenciaisDaoImpl();
-        List<Credenciais> credenciais = credencialDAO.findAll(Order.desc("id"));
-        for (int i = 0; i < credenciais.size(); i++) {
-            if (token.equals(credenciais.get(i).getToken())) {
-                System.out.println("nome " + credenciais.get(i).getUsuario());
-                return credenciais.get(i).getUsuario();               
+            if (contato == null) {
+                return Response.status(Response.Status.NO_CONTENT).build();
+            } else {
+                if (idUser == contato.getUsuario().getId()) {
+                    return Response.status(Response.Status.OK).entity(contato).build();
+                } else {
+                    return Response.status(Response.Status.NOT_FOUND).build();
+                }
             }
-
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(new OutputMessage(500, e.getMessage()))
+                    .build();
         }
-        return null;
-    }
+    }    
 }

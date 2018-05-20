@@ -27,18 +27,13 @@ public class Contatos {
     
     @ManyToOne
     @JoinColumn(name = "id_usuario", nullable = false)
-    //@JsonIgnoreProperties(value = "contact") // to ignore the models from Make class while parsing to your json/xml
     private Usuario usuario;   
     
     public Contatos() {
     }
 
-//    public Contatos(String nome, String numero) {
-//        this.nome = nome;
-//        this.numero = numero;
-//    }
-
     public Contatos(String nome, String numero, Usuario usuario) {
+        super();
         this.nome = nome;
         this.numero = numero;
         this.usuario = usuario;

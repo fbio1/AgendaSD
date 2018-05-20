@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.ufrn.agendasd.security;
 
 import com.ufrn.agendasd.implementations.CredenciaisDaoImpl;
@@ -14,17 +9,10 @@ import java.util.Calendar;
 import javax.crypto.spec.SecretKeySpec;
 import javax.xml.bind.DatatypeConverter;
 
-//import com.quaresma.dao.CredenciaisDao;
-//import com.quaresma.dao.CredenciaisDaoImpl;
-//import com.quaresma.model.Credenciais;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 
-/**
- *
- * @author Taniro
- */
 public class TokenUtil {
 
     public static String criaToken(String username) {
@@ -62,22 +50,15 @@ public class TokenUtil {
             } else {
                 throw new Exception();
             }
-
-        } finally {
-            // TODO: handle finally clause
-        }
-
+        }finally{            
+        } 
     }
 
     public static void refreshToken(Credenciais credencial) {
         ICredenciasDao credenciaisDao = new CredenciaisDaoImpl();
-        Credenciais credenciaisWithNewToken = new Credenciais();
-
-        credenciaisWithNewToken = credenciaisDao.findById(credencial.getId());
-
-        credenciaisWithNewToken.setToken(criaToken(credenciaisWithNewToken.getUsername()));
-
-        credenciaisDao.save(credenciaisWithNewToken);
-
+        Credenciais credenciaisNovoToken = new Credenciais();
+        credenciaisNovoToken = credenciaisDao.findById(credencial.getId());
+        credenciaisNovoToken.setToken(criaToken(credenciaisNovoToken.getUsername()));
+        credenciaisDao.save(credenciaisNovoToken);
     }
 }

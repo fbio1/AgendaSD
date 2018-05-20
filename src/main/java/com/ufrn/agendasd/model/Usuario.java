@@ -1,15 +1,12 @@
 package com.ufrn.agendasd.model;
 
 import java.io.Serializable;
-import java.util.List;
 import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 @Entity
@@ -27,13 +24,6 @@ public class Usuario implements Serializable{
     @Column(nullable = false)
     private String cpf;
     
-    //@OneToMany(mappedBy = "usuario")
-    //@JsonIgnoreProperties(value = "user") // to ignore the make from Model class while parsing to your json/xml
-    //private List<Contatos> contacts;
-    
-//    @OneToOne (mappedBy="usuarios")
-//    private Credenciais credenciais;
-
     public Usuario() {
     }
 

@@ -15,5 +15,4 @@ public interface IGenericDao<T, ID extends Serializable> {
     List<T> findAll(Order order); 
     List<T> findAllBy(String property, List<?> values, Order order);
     List<T> findAllBy(String property, List<?> values);
-    void close();
 }
