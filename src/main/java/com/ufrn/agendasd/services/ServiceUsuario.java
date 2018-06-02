@@ -26,7 +26,7 @@ public class ServiceUsuario {
 //    {
 //	"usuario":{
 //		"nome": "fabin",
-//		"cpf": "132.868.657-45"
+//		"cpf": "515151-100"
 //	},
 //	"username": "fbio15",
 //	"password": "123"
